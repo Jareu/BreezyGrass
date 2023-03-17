@@ -56,7 +56,8 @@ int main()
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_RenderClear(renderer); // initialize backbuffer
 	is_running = true; // everything was set up successfully
-	last_frame_time = std::chrono::high_resolution_clock::now();
+
+	initialize_objects();
 
 	SDL_ShowWindow(window);
 
@@ -103,7 +104,7 @@ void update(double dt)
 	double f, dl;
 	Vector2<float> pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
 
-	// Initialize the spring forces
+	// Initialize the spring forces on each object to zero.
 	for (i = 0; i < NUM_OBJECTS; i++) {
 		objects[i].spring_force.set_x(0.f);
 		objects[i].spring_force.set_y(0.f);
@@ -132,6 +133,10 @@ void update(double dt)
 
 		j = springs[i].end2;
 		objects[j].spring_force -= F;
+	}
+
+	for (i = 0; i < NUM_OBJECTS; i++) {
+		objects[i].update(dt);
 	}
 }
 
@@ -182,14 +187,18 @@ bool initialize_objects()
 	Vector2<float> nominal_length {};
 	int i;
 
-	objects[0].locked = true;
+	// set frame time
+	last_frame_time = std::chrono::high_resolution_clock::now();
 
 	// Initialize particle locations from left to right.
 	for (i = 0; i < NUM_OBJECTS; i++)
 	{
+		objects[i] = Particle{};
 		objects[i].position.set_x( WINDOW_WIDTH / 2.f + objects[0].length * i );
 		objects[i].position.set_y( WINDOW_HEIGHT / 8.f );
 	}
+
+	objects[0].locked = true;
 
 	// Initialize springs connecting particles from left to right.
 	for (i = 0; i < NUM_SPRINGS; i++)

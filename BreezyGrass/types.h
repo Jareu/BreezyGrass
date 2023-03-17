@@ -14,12 +14,8 @@ enum RENDER_RESULT {
 	RENDER_FAILED = 1
 };
 
-constexpr uint16_t SPRING_K = 1000;
-constexpr uint16_t SPRING_D = 100;
-
-namespace PARTICLE_DEFAULTS {
-	constexpr float length = 100;
-}
+constexpr uint16_t SPRING_K = 2000;
+constexpr uint16_t SPRING_D = 20;
 
 template <typename T>
 class Vector2 {
@@ -365,14 +361,3 @@ typedef struct _Spring
 	float damping = SPRING_D;
 	float nominal_length{0.f};
 } Spring;
-
-typedef struct _Particle
-{
-	bool locked = false;
-	float length{ 0.f };
-	Vector2<float> position{ 0.f, 0.f };
-	Vector2<float> velocity{ 0.f, 0.f };
-	Vector2<float> spring_force{ 0.f, 0.f };
-	float angle_radians{0.f};
-	float mass_kg{ 1.f };
-} Particle;

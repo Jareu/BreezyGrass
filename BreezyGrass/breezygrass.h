@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 
+#include "Particle.h"
 #include "types.h"
 
 #define TWOPI 6.2831853071f
