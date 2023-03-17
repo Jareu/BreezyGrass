@@ -162,7 +162,7 @@ public:
 private:
 	T x_ = 0;
 	T y_ = 0;
-	bool magnitude_stale_ = false;
+	bool magnitude_stale_ = true;
 	float magnitude_ = 0.f;
 };
 
