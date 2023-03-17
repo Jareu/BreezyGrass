@@ -6,7 +6,7 @@ void Particle::update(double elapsed_time)
 
 	// Integrate equation of motion:
 	if (!locked) {
-		a = (spring_force + Vector2<float>{ 0.f, 100.f * 9.81f }) / mass_kg;
+		a = spring_force / mass_kg + Vector2<float>{ 0.f, 100 * 9.81f };
 		dv = a * elapsed_time;
 		velocity += dv;
 		ds = velocity * elapsed_time;
