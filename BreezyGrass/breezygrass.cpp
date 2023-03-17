@@ -34,7 +34,6 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-
 	// Create Window
 	window = SDL_CreateWindow("Test Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_FLAGS);
 	if (!window) {
@@ -94,11 +93,46 @@ float get_elapsed_time()
 	int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
 	last_frame_time = std::chrono::high_resolution_clock::now();
 	elapsed_time = static_cast<float>(microseconds / 1000000.0);
+	return elapsed_time;
 }
 
 // Do physics
 void update(double dt)
 {
+	int i, j;
+	double f, dl;
+	Vector2<float> pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
+
+	// Initialize the spring forces
+	for (i = 0; i < NUM_OBJECTS; i++) {
+		objects[i].spring_force.set_x(0.f);
+		objects[i].spring_force.set_y(0.f);
+	}
+
+	// Calculate all spring forces based on positions of connected objects.
+	for (i = 0; i < NUM_SPRINGS; i++)
+	{
+		j = springs[i].end1;
+		pt1 = objects[j].position;
+		v1 = objects[j].velocity;
+
+		j = springs[i].end2;
+		pt2 = objects[j].position;
+		v2 = objects[j].velocity;
+
+		vr = v2 - v1;
+		r = pt2 - pt1;
+		dl = r.magnitude() - springs[i].nominal_length;
+		f = springs[i].k * dl; // - means compression, + means tension
+		r.normalize();
+		F = (r * f) + (springs[i].damping * (vr * r)) * r;
+
+		j = springs[i].end1;
+		objects[j].spring_force += F;
+
+		j = springs[i].end2;
+		objects[j].spring_force -= F;
+	}
 }
 
 // Render the Game
@@ -145,8 +179,9 @@ int render()
 
 bool initialize_objects()
 {
-	Vector2<float> nominal_length(0.f, 0.f);
+	Vector2<float> nominal_length {};
 	int i;
+
 	objects[0].locked = true;
 
 	// Initialize particle locations from left to right.
