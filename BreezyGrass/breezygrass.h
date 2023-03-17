@@ -31,3 +31,4 @@ void	handleEvents();
 void	update(double dt);
 float	get_elapsed_time();
 int		render();
+bool	initialize_objects();

@@ -143,6 +143,30 @@ int render()
 	return RENDER_RESULT::RENDER_SUCCESS;
 }
 
+bool initialize_objects()
+{
+	Vector2<float> nominal_length(0.f, 0.f);
+	int i;
+	objects[0].locked = true;
+
+	// Initialize particle locations from left to right.
+	for (i = 0; i < NUM_OBJECTS; i++)
+	{
+		objects[i].position.set_x( WINDOW_WIDTH / 2.f + objects[0].length * i );
+		objects[i].position.set_y( WINDOW_HEIGHT / 8.f );
+	}
+
+	// Initialize springs connecting particles from left to right.
+	for (i = 0; i < NUM_SPRINGS; i++)
+	{
+		springs[i].end1 = i;
+		springs[i].end2 = i + 1;
+		nominal_length = objects[i + 1].position - objects[i].position;
+		springs[i].nominal_length = nominal_length.magnitude();
+	}
+
+	return true;
+}
 
 
 // handles any events that SDL noticed.
