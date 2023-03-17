@@ -24,7 +24,7 @@ namespace PARTICLE_DEFAULTS {
 template <typename T>
 class Vector2 {
 public:
-	Vector2() {
+	explicit Vector2() {
 		Vector2(static_cast<T>(0.f), static_cast<T>(0.f));
 	}
 
@@ -32,7 +32,7 @@ public:
 		static_assert(std::is_arithmetic<T>::value, "Vector2 must be numeric type.");
 	};
 
-	float magnitude() const {
+	float magnitude() {
 		// if magnitude is out of date, recalculate it
 		if (magnitude_stale_) {
 			magnitude_ = sqrtf(static_cast<float>(x_ * x_ + y_ * y_));
@@ -42,7 +42,7 @@ public:
 		return magnitude_;
 	}
 
-	void normalize() const {
+	void normalize() {
 		magnitude(); // ensure magnitude is up to date
 		x_ = x_ / magnitude_;
 		y_ = y_ / magnitude_;
@@ -67,63 +67,59 @@ public:
 		y_ = val;
 	}
 
-	// addition with same type
-	const Vector2 operator+(const Vector2& rhs) const {
-		return Vector2{
-			this->x_ + rhs.x_,
-			this->y_ + rhs.y_
-		};
-	}
-
-	// addition with different type
+	// addition with vector2
 	template <typename B>
-	const Vector2 operator+(const Vector2<B>& rhs) const {
+	const Vector2<T> operator+(const Vector2<B>& rhs) const {
 		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator +");
-		return Vector2{
+		return Vector2<T>{
 			this->x_ + static_cast<T> (rhs.x_),
 			this->y_ + static_cast<T> (rhs.y_)
 		};
 	}
 
-	// addition and assignment with same type
-	Vector2& operator+=(const Vector2& rhs) {
-		this->x_ = this->x_ + rhs.x_;
-		this->y_ = this->y_ + rhs.y_;
+	// addition and assignment with vector2
+	template <typename B>
+	Vector2<T>& operator+=(const Vector2<B>& rhs) {
+		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator -");
+		this->x_ = this->x_ + static_cast<T> (rhs.x_);
+		this->y_ = this->y_ + static_cast<T> (rhs.y_);
 		return *this;
 	}
 
-	// subtraction with same type
-	const Vector2 operator-(const Vector2& rhs) const {
-		return Vector2{
-			this->x_ - rhs.x_,
-			this->y_ - rhs.y_
-		};
-	}
-
-	// subtraction with different type
+	// subtraction with vector2
 	template <typename B>
-	const Vector2 operator-(const Vector2<B>& rhs) const {
+	const Vector2<T> operator-(const Vector2<B>& rhs) const {
 		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator -");
-		return Vector2{
+		return Vector2<T>{
 			this->x_ - static_cast<T> (rhs.x_),
 			this->y_ - static_cast<T> (rhs.y_)
 		};
 	}
 
-	// subtraction and assignment with same type
-	Vector2& operator-=(const Vector2& rhs) {
-		this->x_ = this->x_ - rhs.x_;
-		this->y_ = this->y_ - rhs.y_;
+	// subtraction and assignment with vector2
+	template <typename B>
+	Vector2<T>& operator-=(const Vector2<B>& rhs) {
+		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator -");
+		this->x_ = this->x_ - static_cast<T> (rhs.x_);
+		this->y_ = this->y_ - static_cast<T> (rhs.y_);
 		return *this;
 	}
 
 	// multiplication with scalar
 	template <typename B>
-	const Vector2 operator*(const B& rhs) const {
+	const Vector2<T> operator*(const B& rhs) const {
 		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator *");
-		return Vector2{
+		return Vector2<T>{
 			this->x_ * static_cast<T> (rhs),
 			this->y_ * static_cast<T> (rhs)
+		};
+	}
+
+	// multiplication with vector2
+	const Vector2<T> operator*(const Vector2<T>& rhs) const {
+		return Vector2<T>{
+			this->x_ * static_cast<T> (rhs.x_),
+			this->y_ * static_cast<T> (rhs.y_)
 		};
 	}
 
@@ -138,13 +134,22 @@ public:
 
 	// division with scalar
 	template <typename B>
-	Vector2 operator/(const B& rhs) const {
+	const Vector2 operator/(const B& rhs) const {
 		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator /");
 		return Vector2{
 			this->x_ / static_cast<T> (rhs),
 			this->y_ / static_cast<T> (rhs)
 		};
 	}
+
+	// division with vector2
+	const Vector2<T> operator/(const Vector2<T>& rhs) const {
+		return Vector2<T>{
+			this->x_ / static_cast<T> (rhs.x_),
+			this->y_ / static_cast<T> (rhs.y_)
+		};
+	}
+
 
 	// division and assignment with scalar
 	template <typename B>
@@ -160,6 +165,27 @@ private:
 	bool magnitude_stale_ = false;
 	float magnitude_ = 0.f;
 };
+
+// multiplication with scalar from LHS
+template <typename T, typename B>
+inline const Vector2<T> operator*(const B& lhs, const Vector2<T>& rhs) {
+	static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator *");
+	return Vector2<T>{
+		rhs.x() * static_cast<T> (lhs),
+		rhs.y() * static_cast<T> (lhs)
+	};
+}
+
+
+// division with scalar from LHS
+template <typename T, typename B>
+inline const Vector2<T> operator/(const B& lhs, const Vector2<T>& rhs) {
+	static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator /");
+	return Vector2<T>{
+		rhs.x() / static_cast<T> (lhs),
+		rhs.y() / static_cast<T> (lhs)
+	};
+}
 
 template <typename T>
 class Vector3 {
