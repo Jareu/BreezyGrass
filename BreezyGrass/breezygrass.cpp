@@ -113,7 +113,7 @@ int render()
 	SDL_SetRenderTarget(renderer, sim_texture);
 
 	if (!sim_texture) {
-		sim_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, window_size.x, window_size.y);
+		sim_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, window_size.x(), window_size.y());
 		if (!sim_texture) {
 			std::cout << "Error creating sim texture: " << SDL_GetError() << "\n";
 			return RENDER_RESULT::RENDER_FAILED;
