@@ -7,6 +7,10 @@
 #include "types.h"
 
 #define TWOPI 6.2831853071f
+
+constexpr uint8_t NUM_OBJECTS = 10;
+constexpr uint8_t NUM_SPRINGS = 9;
+
 inline SDL_Renderer* renderer = NULL;
 inline SDL_Window* window = NULL;
 inline int WINDOW_WIDTH = 1920;
@@ -17,6 +21,8 @@ inline bool is_active = false;
 inline bool is_running = false;
 inline bool is_fullscreen = false;
 inline SDL_Rect sim_rect = SDL_Rect{ 0,0,0,0 };
+inline Particle objects[NUM_OBJECTS];
+inline Spring springs[NUM_SPRINGS];
 
 enum RENDER_RESULT {
 	RENDER_SUCCESS = 0,
