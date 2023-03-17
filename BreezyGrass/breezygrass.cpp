@@ -60,6 +60,7 @@ int main()
 	initialize_objects();
 
 	SDL_ShowWindow(window);
+	SDL_RenderFillRect(renderer, NULL);
 
 	while (is_running) {
 		handleEvents();
@@ -71,15 +72,17 @@ int main()
 		}
 	}
 
-
 	// frees memory associated with renderer and window
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	renderer = NULL;
-	window = NULL;
+	renderer = nullptr;
+	window = nullptr;
 
 	// destroy textures
-	SDL_DestroyTexture(sim_texture);
+	if(sim_texture) {
+		SDL_DestroyTexture(sim_texture);
+		sim_texture = nullptr;
+	}
 
 	IMG_Quit();
 	SDL_Quit();
@@ -148,9 +151,7 @@ int render()
 	SDL_SetRenderDrawColor(renderer, 26, 26, 32, 255);
 	SDL_RenderClear(renderer);
 
-	// draw border
-	SDL_SetRenderTarget(renderer, sim_texture);
-
+	/*
 	if (!sim_texture) {
 		sim_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, window_size.x(), window_size.y());
 		if (!sim_texture) {
@@ -158,25 +159,21 @@ int render()
 			return RENDER_RESULT::RENDER_FAILED;
 		}
 	}
+	*/
 
 	// draw to the texture
-	SDL_SetRenderTarget(renderer, sim_texture);
+	//SDL_SetRenderTarget(renderer, sim_texture);
 
 	// fill surface with black
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRect(renderer, NULL);
+	SDL_SetRenderDrawColor(renderer, 200, 0, 0, SDL_ALPHA_OPAQUE);
 
-	// renderCircle(screen_coords, star_radius_large, star->GetColour(), 4);
+	// draw rope
+	for (int i = 0; i < NUM_SPRINGS; i++) {
+		renderLine( objects[i].position, objects[i+1].position, RGB{200, 0, 0});
+	}
 
-	// renderRect(Vector2{ 0, 0 }, ceiling_size, RGBA{ 128, 128, 200, 128 });
-
-	// draw segments
-	/*
-	for (int y = 0; y < ceiling_size.y; y += segment_size) {
-		renderLine(Vector2{ 0, y }, Vector2{ ceiling_size.x, y }, RGB{ 100, 100, 160 });
-	}*/
-
-	SDL_RenderCopy(renderer, sim_texture, NULL, &sim_rect);
+	//SDL_RenderCopy(renderer, sim_texture, NULL, &sim_rect);
+	
 	SDL_RenderPresent(renderer);
 
 	return RENDER_RESULT::RENDER_SUCCESS;
