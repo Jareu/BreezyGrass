@@ -27,7 +27,10 @@ public:
 	T x = 0;
 	T y = 0;
 
-	Vector2() = delete;
+	Vector2() {
+		Vector2(static_cast<T>(0.f), static_cast<T>(0.f));
+	}
+
 	Vector2(T x, T y) : x{ x }, y{ y } {
 		static_assert(std::is_arithmetic<T>::value, "Vector2 must be numeric type.");
 	};
