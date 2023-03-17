@@ -7,6 +7,19 @@
 #include <typeinfo>
 #include <stdint.h>
 #include <math.h>
+#include <cstdint>
+
+enum RENDER_RESULT {
+	RENDER_SUCCESS = 0,
+	RENDER_FAILED = 1
+};
+
+constexpr uint16_t SPRING_K = 1000;
+constexpr uint16_t SPRING_D = 100;
+
+namespace PARTICLE_DEFAULTS {
+	constexpr float length = 100;
+}
 
 template <typename T>
 class Vector2 {
@@ -277,3 +290,23 @@ enum class eFontSize {
 	LARGE,
 	TITLE
 };
+
+typedef struct _Spring
+{
+	int end1{0};
+	int end2{0};
+	float k = SPRING_K;
+	float damping = SPRING_D;
+	float nominal_length{0.f};
+} Spring;
+
+typedef struct _Particle
+{
+	bool locked = false;
+	float length{ 0.f };
+	Vector2<float> position{ 0.f, 0.f };
+	Vector2<float> velocity{ 0.f, 0.f };
+	Vector2<float> spring_force{ 0.f, 0.f };
+	float angle_radians{0.f};
+	float mass_kg{ 1.f };
+} Particle;
