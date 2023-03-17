@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #include "types.h"
 
@@ -21,15 +22,12 @@ inline bool is_active = false;
 inline bool is_running = false;
 inline bool is_fullscreen = false;
 inline SDL_Rect sim_rect = SDL_Rect{ 0,0,0,0 };
+inline std::chrono::steady_clock::time_point last_frame_time {};
 inline Particle objects[NUM_OBJECTS];
 inline Spring springs[NUM_SPRINGS];
 
-enum RENDER_RESULT {
-	RENDER_SUCCESS = 0,
-	RENDER_FAILED = 1
-};
-
-int main();
-void handleEvents();
-void update();
-int render();
+int		main();
+void	handleEvents();
+void	update(double dt);
+float	get_elapsed_time();
+int		render();

@@ -57,12 +57,14 @@ int main()
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_RenderClear(renderer); // initialize backbuffer
 	is_running = true; // everything was set up successfully
+	last_frame_time = std::chrono::high_resolution_clock::now();
 
 	SDL_ShowWindow(window);
 
 	while (is_running) {
 		handleEvents();
-		update();
+		float elapsed_time = get_elapsed_time();
+		update(elapsed_time);
 		if (render() == RENDER_RESULT::RENDER_FAILED) {
 			is_running = false;
 			break;
@@ -85,13 +87,23 @@ int main()
 	return 0;
 }
 
-void update() {
-	// do physics
+float get_elapsed_time()
+{
+	float elapsed_time;
+	auto elapsed = std::chrono::high_resolution_clock::now() - last_frame_time;
+	int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+	last_frame_time = std::chrono::high_resolution_clock::now();
+	elapsed_time = static_cast<float>(microseconds / 1000000.0);
 }
 
+// Do physics
+void update(double dt)
+{
+}
 
 // Render the Game
-int render() {
+int render()
+{
 	if (!is_active) RENDER_RESULT::RENDER_SUCCESS;
 
 	SDL_SetRenderDrawColor(renderer, 26, 26, 32, 255);
@@ -134,7 +146,8 @@ int render() {
 
 
 // handles any events that SDL noticed.
-void handleEvents() {
+void handleEvents()
+{
 	//the only event we'll check is the  SDL_QUIT event.
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
