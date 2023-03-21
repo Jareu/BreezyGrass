@@ -14,5 +14,7 @@ public:
 	float angle_radians{ 0.f };
 	float mass_kg{ 0.5f };
 	float speed{ 0.f };
+
+	Particle() = default;
 	void update(double elapsed_time);
 };
