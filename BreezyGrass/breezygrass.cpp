@@ -11,6 +11,7 @@
 #include <stdlib.h>     /* srand, rand */
 #include <iostream>
 
+#include "math.h"
 #include "types.h"
 #include "graphics.h"
 #include "breezygrass.h"
