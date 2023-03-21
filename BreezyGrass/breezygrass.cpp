@@ -1,4 +1,4 @@
-// BreezyGrass.cpp : This file contains the 'main' function. Program execution begins and ends there.
+﻿// BreezyGrass.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #pragma warning(push, 0)
@@ -106,19 +106,29 @@ void update(double dt)
 {
 	int i, j;
 	double f, dl;
-	Vector2<float> pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
+	Vector2<float> M{}, Fo{}, pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
 
 	// Initialize the spring forces on each object to zero.
-	for (i = 0; i < NUM_OBJECTS; i++) {
+	for (i = 0; i < NUM_LINKS; i++) {
 		objects[i].spring_force.set_x(0.f);
 		objects[i].spring_force.set_y(0.f);
+		objects[i].spring_moment.set_x(0.f);
+		objects[i].spring_moment.set_y(0.f);
 	}
 
 	// Calculate all spring forces based on positions of connected objects.
 	for (i = 0; i < NUM_SPRINGS; i++)
 	{
-		j = springs[i].end1;
-		pt1 = objects[j].position;
+		if (springs[i].end1.ref < 0) {
+			pt1 = springs[i].end1.pt;
+		}
+		else {
+			j = springs[i].end1.ref;
+			pt1 = objects[j].position + rotate_2D(objects[j].angle, springs[i].end1.pt);
+			v1 = objects[j].velocity + rotate_2D(objects[j].angle,
+				 objects[j].angular_velocity ^ springs[i].end1.pt);
+		}
+
 		v1 = objects[j].velocity;
 
 		j = springs[i].end2;
@@ -139,7 +149,7 @@ void update(double dt)
 		objects[j].spring_force -= F;
 	}
 
-	for (i = 0; i < NUM_OBJECTS; i++) {
+	for (i = 0; i < NUM_LINKS; i++) {
 		objects[i].update(dt);
 	}
 }
@@ -183,27 +193,47 @@ int render()
 bool initialize_objects()
 {
 	Vector2<float> nominal_length {};
+	Vector2<float> pt {};
 	int i;
 
 	// set frame time
 	last_frame_time = std::chrono::high_resolution_clock::now();
 
 	// Initialize particle locations from left to right.
-	for (i = 0; i < NUM_OBJECTS; i++)
+	for (i = 0; i < NUM_LINKS; i++)
 	{
-		objects[i] = Particle{};
+		objects[i] = RigidBody2D{};
 		objects[i].position.set_x( WINDOW_WIDTH / 2.f + objects[0].length * i );
 		objects[i].position.set_y( WINDOW_HEIGHT / 8.f );
+		objects[i].angle = 0.f;
 	}
 
-	objects[0].locked = true;
+	// Connect end of the first object to a fixed point in space.
+	springs[0].end1.ref = -1;
+	springs[0].end1.pt.set_x( (WINDOW_WIDTH - objects[0].length) * 0.5f );
+	springs[0].end1.pt.set_y( WINDOW_HEIGHT / 8.f );
 
+	springs[0].end2.ref = 0;
+	springs[0].end2.pt.set_x (-objects[0].length * 0.5f);
+	springs[0].end2.pt.set_y (0.f);
+
+	pt = rotate_2D(objects[0].angle, springs[0].end2.pt) + objects[0].position;
+	nominal_length = pt - springs[0].end1.pt;
+	springs[0].nominal_length = nominal_length.magnitude();
+	
 	// Initialize springs connecting particles from left to right.
-	for (i = 0; i < NUM_SPRINGS; i++)
+	for (i = 1; i < NUM_SPRINGS; i++)
 	{
-		springs[i].end1 = i;
-		springs[i].end2 = i + 1;
-		nominal_length = objects[i + 1].position - objects[i].position;
+		springs[i].end1.ref = i - 1;
+		springs[i].end1.pt.set_x(objects[i-1].length * 0.5f);
+		springs[i].end1.pt.set_y(0.f);
+
+		springs[i].end2.ref = i;
+		springs[i].end2.pt.set_x(-objects[i].length * 0.5f);
+		springs[i].end2.pt.set_y(0.f);
+
+		pt = rotate_2D(objects[i].angle, springs[i].end2.pt) + objects[i].position;
+		nominal_length = pt - rotate_2D(objects[i - 1].angle, springs[i].end1.pt) + objects[i - 1].position;
 		springs[i].nominal_length = nominal_length.magnitude();
 	}
 

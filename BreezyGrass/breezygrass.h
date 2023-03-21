@@ -5,13 +5,13 @@
 #include <vector>
 #include <chrono>
 
-#include "Particle.h"
+#include "RigidBody2D.h"
 #include "types.h"
 
 #define TWOPI 6.2831853071f
 
-constexpr uint8_t NUM_OBJECTS = 50;
-constexpr uint8_t NUM_SPRINGS = NUM_OBJECTS-1;
+constexpr uint8_t NUM_LINKS = 10;
+constexpr uint8_t NUM_SPRINGS = NUM_LINKS;
 
 inline SDL_Renderer* renderer = nullptr;
 inline SDL_Window* window = nullptr;
@@ -24,7 +24,7 @@ inline bool is_running = false;
 inline bool is_fullscreen = true;
 inline SDL_Rect sim_rect = SDL_Rect{ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 inline std::chrono::steady_clock::time_point last_frame_time {};
-inline Particle objects[NUM_OBJECTS];
+inline RigidBody2D objects[NUM_LINKS];
 inline Spring springs[NUM_SPRINGS];
 inline float scale = 100.f; // pixels per meter
 
