@@ -63,6 +63,14 @@ public:
 		y_ = val;
 	}
 
+	// cross product with vector2
+	template <typename B>
+	const T operator^(const Vector2<B>& rhs) const {
+		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator +");
+		const T cross_product = this->x_* static_cast<T> (rhs.y_) - this->y_ * static_cast<T> (rhs.x_);
+		return cross_product;
+	}
+
 	// addition with vector2
 	template <typename B>
 	const Vector2<T> operator+(const Vector2<B>& rhs) const {
@@ -314,7 +322,6 @@ public:
 		return sum;
 	}
 };
-
 
 template <typename T>
 class Range {
