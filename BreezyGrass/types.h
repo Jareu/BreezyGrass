@@ -353,10 +353,15 @@ enum class eFontSize {
 	TITLE
 };
 
+typedef struct _EndPointRef {
+	int	ref;
+	Vector2<float> pt;
+} EndPoint;
+
 typedef struct _Spring
 {
-	int end1{0};
-	int end2{0};
+	EndPoint end1;
+	EndPoint end2;
 	float k = SPRING_K;
 	float damping = SPRING_D;
 	float nominal_length{0.f};
