@@ -104,12 +104,10 @@ float get_elapsed_time()
 // Do physics
 void update(double dt)
 {
-	int i, j;
-	double f, dl;
-	Vector2<float> M{}, Fo{}, pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
+	int j;
 
 	// Initialize the spring forces on each object to zero.
-	for (i = 0; i < NUM_LINKS; i++) {
+	for (int i = 0; i < NUM_LINKS; i++) {
 		objects[i].spring_force.set_x(0.f);
 		objects[i].spring_force.set_y(0.f);
 		objects[i].spring_moment.set_x(0.f);
@@ -117,24 +115,30 @@ void update(double dt)
 	}
 
 	// Calculate all spring forces based on positions of connected objects.
-	for (i = 0; i < NUM_SPRINGS; i++)
+	for (int i = 0; i < NUM_SPRINGS; i++)
 	{
+		double f, dl;
+		Vector2<float> M{}, Fo{}, pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
+
 		if (springs[i].end1.ref < 0) {
 			pt1 = springs[i].end1.pt;
 		}
 		else {
 			j = springs[i].end1.ref;
 			pt1 = objects[j].position + rotate_2D(objects[j].angle, springs[i].end1.pt);
-			v1 = objects[j].velocity + rotate_2D(objects[j].angle,
-				 objects[j].angular_velocity ^ springs[i].end1.pt);
+			v1 = objects[j].velocity + rotate_2D(objects[j].angle, objects[j].angular_velocity * springs[i].end1.pt).rotated_90();
 		}
 
-		v1 = objects[j].velocity;
+		if (springs[i].end2.ref < 0) {
+			pt2 = springs[i].end2.pt;
+		}
+		else {
+			j = springs[i].end2.ref;
+			pt2 = objects[j].position + rotate_2D(objects[j].angle, springs[i].end2.pt);
+			v2 = objects[j].velocity + rotate_2D(objects[j].angle, objects[j].angular_velocity * springs[i].end2.pt).rotated_90();
+		}
 
-		j = springs[i].end2;
-		pt2 = objects[j].position;
-		v2 = objects[j].velocity;
-
+		// Compute spring-damper-force
 		vr = v2 - v1;
 		r = pt2 - pt1;
 		dl = r.magnitude() - springs[i].nominal_length;
@@ -142,14 +146,41 @@ void update(double dt)
 		r.normalize();
 		F = (r * f) + (springs[i].damping * (vr * r)) * r;
 
-		j = springs[i].end1;
-		objects[j].spring_force += F;
+		j = springs[i].end1.ref;
+		if (j >= 0) {
+			objects[j].spring_force += F;
+		}
 
-		j = springs[i].end2;
-		objects[j].spring_force -= F;
+		j = springs[i].end2.ref;
+		if (j >= 0) {
+			objects[j].spring_force -= F;
+		}
+
+		// convert force to first ref local coords
+		// Get local lever
+		// calc moment
+		// 
+		// Compute and aggregate moments due to spring force
+		// on each connected object.
+		j = springs[i].end1.ref;
+		if (j >= 0) {
+			Fo = rotate_2D(-objects[j].angle, F);
+			r = springs[i].end1.pt;
+			M = r ^ Fo;
+			objects[j].spring_moment += M;
+		}
+
+		j = springs[i].end2.ref;
+		if (j >= 0) {
+			Fo = rotate_2D(-objects[j].angle, F);
+			r = springs[i].end2.pt;
+			M = r ^ Fo;
+			objects[j].spring_moment -= M;
+		}
+
 	}
 
-	for (i = 0; i < NUM_LINKS; i++) {
+	for (int i = 0; i < NUM_LINKS; i++) {
 		objects[i].update(dt);
 	}
 }
