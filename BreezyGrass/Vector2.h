@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defines.h"
+
 template <typename T>
 class Vector2 {
 public:

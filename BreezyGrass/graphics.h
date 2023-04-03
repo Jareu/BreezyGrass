@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string.h>
 #include "types.h"
 
 void renderCircle(const Vector2<int> center, float radius, const RGB& color, unsigned int sides);

@@ -1,14 +1,12 @@
 #pragma once
 
-#include <string>
 #include <utility>
 #include <vector>
 #include <chrono>
 
 #include "RigidBody2D.h"
 #include "types.h"
-
-#define TWOPI 6.2831853071f
+#include "defines.h"
 
 constexpr uint8_t NUM_LINKS = 10;
 constexpr uint8_t NUM_SPRINGS = NUM_LINKS;
