@@ -8,6 +8,7 @@
 #pragma warning(pop)
 #undef main
 
+#include <string>
 #include <stdlib.h>     /* srand, rand */
 #include <iostream>
 
@@ -108,17 +109,15 @@ void update(double dt)
 
 	// Initialize the spring forces on each object to zero.
 	for (int i = 0; i < NUM_LINKS; i++) {
-		objects[i].spring_force.set_x(0.f);
-		objects[i].spring_force.set_y(0.f);
-		objects[i].spring_moment.set_x(0.f);
-		objects[i].spring_moment.set_y(0.f);
+		objects[i].spring_force = { 0.f, 0.f };
+		objects[i].spring_moment = 0.f;
 	}
 
 	// Calculate all spring forces based on positions of connected objects.
 	for (int i = 0; i < NUM_SPRINGS; i++)
 	{
-		double f, dl;
-		Vector2<float> M{}, Fo{}, pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
+		double f, dl, M;
+		Vector2<float> Fo{}, pt1{}, pt2{}, r{}, F{}, v1{}, v2{}, vr{};
 
 		if (springs[i].end1.ref < 0) {
 			pt1 = springs[i].end1.pt;
@@ -141,6 +140,12 @@ void update(double dt)
 		// Compute spring-damper-force
 		vr = v2 - v1;
 		r = pt2 - pt1;
+
+		if (abs(r.magnitude()) < INFINITESIMAL) {
+			// don't calculate for point springs
+			continue;
+		}
+
 		dl = r.magnitude() - springs[i].nominal_length;
 		f = springs[i].k * dl; // - means compression, + means tension
 		r.normalize();
@@ -167,7 +172,7 @@ void update(double dt)
 			Fo = rotate_2D(-objects[j].angle, F);
 			r = springs[i].end1.pt;
 			M = r ^ Fo;
-			objects[j].spring_moment += M;
+			objects[j].spring_moment += static_cast<float>(M);
 		}
 
 		j = springs[i].end2.ref;
@@ -175,7 +180,7 @@ void update(double dt)
 			Fo = rotate_2D(-objects[j].angle, F);
 			r = springs[i].end2.pt;
 			M = r ^ Fo;
-			objects[j].spring_moment -= M;
+			objects[j].spring_moment -= static_cast<float>(M);
 		}
 
 	}
@@ -193,19 +198,6 @@ int render()
 	SDL_SetRenderDrawColor(renderer, 26, 26, 32, 255);
 	SDL_RenderClear(renderer);
 
-	/*
-	if (!sim_texture) {
-		sim_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, window_size.x(), window_size.y());
-		if (!sim_texture) {
-			std::cout << "Error creating sim texture: " << SDL_GetError() << "\n";
-			return RENDER_RESULT::RENDER_FAILED;
-		}
-	}
-	*/
-
-	// draw to the texture
-	//SDL_SetRenderTarget(renderer, sim_texture);
-
 	// fill surface with black
 	SDL_SetRenderDrawColor(renderer, 200, 0, 0, SDL_ALPHA_OPAQUE);
 
@@ -213,8 +205,6 @@ int render()
 	for (int i = 0; i < NUM_SPRINGS; i++) {
 		renderLine( objects[i].position, objects[i+1].position, RGB{200, 0, 0});
 	}
-
-	//SDL_RenderCopy(renderer, sim_texture, NULL, &sim_rect);
 	
 	SDL_RenderPresent(renderer);
 
