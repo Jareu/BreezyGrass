@@ -162,11 +162,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="breezygrass.h" />
+    <ClInclude Include="defines.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="RigidBody2D.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
