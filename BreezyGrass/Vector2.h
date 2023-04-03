@@ -25,13 +25,16 @@ public:
 
 	void normalize() {
 		magnitude(); // ensure magnitude is up to date
+		if (abs(magnitude_) < INFINITESIMAL) {
+			return;
+		}
 		x_ = x_ / magnitude_;
 		y_ = y_ / magnitude_;
 		magnitude_ = 1.f;
 	}
 
 	Vector2<T> rotated_90() {
-		return Vector2 { -_y, _x };
+		return Vector2{ -y_, x_ };
 	}
 
 	const T& x() const {
@@ -83,10 +86,11 @@ public:
 	template <typename B>
 	const Vector2<T> operator-(const Vector2<B>& rhs) const {
 		static_assert(std::is_arithmetic<B>::value, "RHS must be numeric type for operator -");
-		return Vector2<T>{
+		const auto subtraction = Vector2<T>{
 			this->x_ - static_cast<T> (rhs.x_),
-				this->y_ - static_cast<T> (rhs.y_)
+			this->y_ - static_cast<T> (rhs.y_)
 		};
+		return subtraction;
 	}
 
 	// subtraction and assignment with vector2
