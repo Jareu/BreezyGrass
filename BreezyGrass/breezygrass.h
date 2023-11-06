@@ -4,6 +4,7 @@
 #include <vector>
 #include <chrono>
 
+#include "SDL.h"
 #include "RigidBody2D.h"
 #include "types.h"
 #include "defines.h"
