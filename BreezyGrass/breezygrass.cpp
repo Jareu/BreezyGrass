@@ -1,4 +1,4 @@
-﻿// BreezyGrass.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// BreezyGrass.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #pragma warning(push, 0)
