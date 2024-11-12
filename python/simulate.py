@@ -228,7 +228,7 @@ class PressureGridSimulation:
     def _handle_click(self, event, pressure: float):
         """Handle regular mouse clicks"""
         circle_radius = 10
-        ring_thickness = 4
+        ring_thickness = 5
         cursor_x = int(event.x / self.CELL_SIZE)
         cursor_y = int(event.y / self.CELL_SIZE)
 
@@ -236,7 +236,7 @@ class PressureGridSimulation:
             for i in range(-circle_radius, circle_radius + 1):
                 for j in range(-circle_radius, circle_radius + 1):
                     distance = math.sqrt(i**2 + j**2)
-                    if distance <= circle_radius:
+                    if distance <= circle_radius and distance > circle_radius - ring_thickness:
                         self._set_pressure(cursor_x + i, cursor_y + j, pressure)
     
 if __name__ == "__main__":
