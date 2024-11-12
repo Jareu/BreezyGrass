@@ -5,6 +5,7 @@ import threading
 import time
 from opensimplex import OpenSimplex
 import colorsys
+from grass_blade import GrassBlade
 
 class PressureGridSimulation:
     def __init__(self, window_size: int = 640, grid_size: int = 64):
@@ -19,8 +20,6 @@ class PressureGridSimulation:
         self.TARGET_FPS = 30
         self.simulation_speed = 1.0
         self.running = True
-        self.pause_on_next_step = False
-        self.paused = False
         
         self.reflecting_boundaries = False  # Can be toggled
         self.boundary_damping = 0.95      # Damping factor for absorbing boundaries
@@ -52,6 +51,11 @@ class PressureGridSimulation:
         # Add velocity grid to track fluid movement
         self.velocity_x = np.zeros((grid_size, grid_size), dtype=float)
         self.velocity_y = np.zeros((grid_size, grid_size), dtype=float)
+        
+        # Add grass blades and their line objects
+        self.grass_blades = []
+        self.grass_lines = []  # Store line objects for each segment
+        self._setup_grass()
         
         # Start simulation thread
         self.sim_thread = threading.Thread(target=self._simulation_loop, daemon=True)
@@ -184,14 +188,11 @@ class PressureGridSimulation:
         while self.running:
             loop_start = time.time()
             
-            # Simulate pressure waves
-            if not self.paused:
-                self._simulate_pressure_step()
-                self.root.after(0, self._update_grid_display)
-            
-            if self.pause_on_next_step:
-                self.paused = True
-                self.pause_on_next_step = False
+            self._simulate_pressure_step()
+            self._update_grass(self.DT)
+
+            self.root.after(0, self._update_grid_display)
+            self.root.after(0, self._draw_grass)
             
             # Maintain target FPS
             elapsed = time.time() - loop_start
@@ -239,6 +240,50 @@ class PressureGridSimulation:
                     if distance <= circle_radius and distance > circle_radius - ring_thickness:
                         self._set_pressure(cursor_x + i, cursor_y + j, pressure)
     
+    def _setup_grass(self):
+        """Initialize grass blades and their line objects"""
+        # Add some grass blades along the bottom
+        for x in range(0, self.WINDOW_SIZE, 40):
+            blade = GrassBlade(
+                base_position=(x, 0),
+                num_segments=5,
+                segment_length=self.CELL_SIZE * 2.5,
+                segment_mass=0.1,
+                spring_constant=3.0,
+                damping=0.1
+            )
+            self.grass_blades.append(blade)
+            
+            # Create line objects for this blade
+            blade_lines = []
+            for _ in range(len(blade.segments)):
+                line = self.canvas.create_line(0, 0, 0, 0, fill='green', width=2)
+                blade_lines.append(line)
+            self.grass_lines.append(blade_lines)
+    
+    def _update_grass(self, dt: float):
+        """Update all grass blades"""
+        for blade in self.grass_blades:
+            # Get pressure at blade's location
+            grid_x = int(blade.base_position[0] / self.CELL_SIZE)
+            grid_y = int(blade.base_position[1] / self.CELL_SIZE)
+            
+            if 0 <= grid_x < self.GRID_SIZE and 0 <= grid_y < self.GRID_SIZE:
+                pressure = self.pressure_grid[grid_y, grid_x]
+                blade.update(dt, pressure)
+    
+    def _draw_grass(self):
+        """Update positions of grass blade lines"""
+        for blade_idx, blade in enumerate(self.grass_blades):
+            prev_pos = blade.base_position
+            for segment_idx, segment in enumerate(blade.segments):
+                self.canvas.coords(
+                    self.grass_lines[blade_idx][segment_idx],
+                    prev_pos[0], self.WINDOW_SIZE - prev_pos[1],
+                    segment.position[0], self.WINDOW_SIZE - segment.position[1]
+                )
+                prev_pos = segment.position
+
 if __name__ == "__main__":
     sim = PressureGridSimulation()
     sim.run()
